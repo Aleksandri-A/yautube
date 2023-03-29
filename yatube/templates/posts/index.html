@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load cache %}
-  {% for post in page_obj %}
-    {% cache 20 sidebar index_page %}
+  {% cache 20 sidebar index_page %}
+    {% for post in page_obj %}
       {% include 'posts/includes/post_list.html' %} 
       {% if post.group %}   
         <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a><br>
       {% endif %}
-    {% endcache %} 
-    {% if not forloop.last %}<hr>{% endif %}
-  {% endfor %} 
-  {% include 'posts/includes/paginator.html' %}
+      {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %} 
+    {% include 'posts/includes/paginator.html' %}
+  {% endcache %} 
 {% endblock %}
