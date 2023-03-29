@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.cache import cache_page
 
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
@@ -26,7 +25,6 @@ def group_list(request, slug):
     return render(request, 'posts/group_list.html', context)
 
 
-@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.select_related('author', 'group')
     paginator = Paginator(post_list, COUNT)
@@ -89,8 +87,6 @@ def post_create(request):
         'form': form,
         'groups': groups,
     }
-    if request.method != 'POST':
-        return render(request, template, context)
     if not form.is_valid():
         return render(request, template, context)
     post = form.save(commit=False)
@@ -160,9 +156,8 @@ def profile_follow(request, username):
     follower = Follow.objects.filter(user=request.user, author=author)
     if request.user != author and not follower.exists():
         Follow.objects.create(user=request.user, author=author)
-    else:
-        return redirect('posts:profile', (request.user.username))
-    return redirect('posts:follow_index')
+        return redirect('posts:follow_index')
+    return redirect('posts:profile', (request.user.username))
 
 
 @login_required
@@ -170,6 +165,5 @@ def profile_unfollow(request, username):
     # Дизлайк, отписка
     author = get_object_or_404(User, username=username)
     following = Follow.objects.filter(user=request.user, author=author)
-    if following.exists():
-        following.delete()
+    following.delete()
     return redirect('posts:follow_index')
